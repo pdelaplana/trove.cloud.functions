@@ -1,0 +1,22 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Firebase Function",
+      "program": "${workspaceFolder}/functions/lib/index.js",
+      "runtimeArgs": ["--inspect=9229"],
+      "cwd": "${workspaceFolder}/functions",
+      "outFiles": ["${workspaceFolder}/functions/lib/**/*.js"],
+      "env": {
+        //"FIREBASE_AUTH_EMULATOR_HOST": "localhost:9099",
+        "FIRESTORE_EMULATOR_HOST": "localhost:8816"
+        //"GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/functions/credentials/serviceAccountKey.json"
+      }
+    }
+  ]
+}

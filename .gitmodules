@@ -1,0 +1,3 @@
+[submodule "functions/src/domain"]
+	path = functions/src/domain
+	url = https://github.com/pdelaplana/trove.domain.git

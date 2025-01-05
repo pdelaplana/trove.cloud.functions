@@ -1,0 +1,40 @@
+{
+  "name": "functions",
+  "scripts": {
+    "lint": "eslint --ext .js,.ts .",
+    "dev": "concurrently \"npm run build:watch\" \"npm run serve\"",
+    "build": "tsc && tsc-alias",
+    "build:watch": "tsc --watch & tsc-alias --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "format": "prettier --write \"src/**/*.{js,ts}\"",
+    "format:check": "prettier --check \"src/**/*.{js,ts}\""
+  },
+  "engines": {
+    "node": "22"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^8.9.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^5.2.1",
+    "firebase-functions-test": "^3.1.0",
+    "prettier": "^3.4.2",
+    "tsc-alias": "^1.8.10",
+    "typescript": "^4.9.5"
+  },
+  "private": true
+}

@@ -1,0 +1,1 @@
+export { maintainLoyaltyProgramView } from './maintainLoyaltyProgramView';
