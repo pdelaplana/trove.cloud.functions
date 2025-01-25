@@ -16,4 +16,12 @@ module.exports = {
     '/generated/**/*', // Ignore generated files.
   ],
   plugins: ['@typescript-eslint', 'import'],
+  rules: {
+    'no-unused-vars': [
+      'error',
+      {
+        args: 'none',
+      },
+    ],
+  },
 };

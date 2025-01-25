@@ -2,14 +2,18 @@ import {
   about,
   healthcheck,
   enrollCustomer,
-  completePurchase,
+  earnPoints,
+  generateApiKey,
+  validateApiKey,
+  getLoyaltyCardInfo,
 } from './endpoints';
-import { maintainLoyaltyProgramView } from './triggers';
 
 export {
   enrollCustomer,
   about,
   healthcheck,
-  maintainLoyaltyProgramView,
-  completePurchase,
+  earnPoints,
+  generateApiKey,
+  validateApiKey,
+  getLoyaltyCardInfo,
 };

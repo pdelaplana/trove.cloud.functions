@@ -1,20 +1,25 @@
 import { LoyaltyCard } from '@src/domain';
 import { db } from '../../firebase';
 import { logger } from 'firebase-functions/v2';
+import { toLoyaltyCard } from '../mappers/toLoyaltyCard';
 
 export const fetchLoyaltyCardByMembershipNumber = async (
   membershipNumber: string
 ): Promise<LoyaltyCard | null> => {
+  logger.log('fetchLoyaltyCardByMembershipNumber - start', {
+    membershipNumber,
+  });
+
   const query = await db
-    .collection('loyaltyCards')
+    .collectionGroup('loyaltyCards')
     .where('membershipNumber', '==', membershipNumber)
+    .limit(1)
     .get();
 
   if (query.empty) {
-    logger.warn('Loyaltty Card not found', { membershipNumber });
+    logger.warn('Loyalty Card not found', { membershipNumber });
     return null;
-  } else {
-    const doc = query.docs[0];
-    return { ...doc.data(), id: doc.id } as LoyaltyCard;
   }
+
+  return toLoyaltyCard(query.docs[0]);
 };

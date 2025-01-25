@@ -4,8 +4,10 @@ import { db } from '../../firebase';
 export const createLoyaltyCardTransaction = async (
   transaction: Omit<LoyaltyCardTransaction, 'id'>
 ): Promise<string> => {
-  const reference = await db
+  const businessRef = db.collection('businesses').doc(transaction.businessId);
+  const transactionRef = await businessRef
     .collection('loyaltyCardTransactions')
     .add(transaction);
-  return reference.id;
+
+  return transactionRef.id;
 };

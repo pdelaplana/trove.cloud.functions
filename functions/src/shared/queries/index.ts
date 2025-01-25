@@ -3,3 +3,8 @@ export { fetchLoyaltyCardById } from './fetchLoyaltyCardById';
 export { fetchLoyaltyCardByMembershipNumber } from './fetchLoyaltyCardByMembershipNumber';
 export { fetchLoyaltyProgramByUniqueCode } from './fetchLoyaltyProgramByUniqueCode';
 export { fetchLoyaltyCardTransactionById } from './fetchLoyaltyCardTransactionById';
+export { fetchCustomerById } from './fetchCustomerById';
+export { fetchBusinessIdByApiKey } from './fetchBusinessIdByApiKey';
+export { fetchCustomerByEmailOrPhone } from './fetchCustomerByEmailOrPhone';
+export { fetchLoyaltyProgramById } from './fetchLoyaltyProgramById';
+export { fetchLoyaltyCardByCustomerAndBusinessId } from './fetchLoyaltyCardByCustomerAndBusinessId';
