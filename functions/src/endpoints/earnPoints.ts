@@ -14,7 +14,6 @@ import {
 import { fetchLoyaltyProgramById } from '@src/shared/queries/fetchLoyaltyProgramById';
 import { beginTimedOperation } from '@src/shared/helpers/beginTimedOperation';
 import { runWithAuthentication } from '@src/shared/helpers/runWithAuthentication';
-import { logger } from 'firebase-functions/v2';
 
 export const earnPoints = onRequest(async (request, response) => {
   // check for required fields
@@ -117,15 +116,14 @@ export const earnPoints = onRequest(async (request, response) => {
                 transaction.finalAmount = amount - transaction.discountAmount;
                 break;
               case 'pointsBonus':
-                transaction.bonusPoints = amount * (perk.pointsBonus ?? 0);
-                transaction.earnedPoints += transaction.bonusPoints;
-
+                transaction.bonusPoints = perk.pointsBonus ?? 0;
                 break;
               case 'freeProduct':
                 transaction.rewardsEarned.push(perk.freeProduct ?? '');
             }
           });
         }
+
         // finalize points calculation for this transaction
         transaction.totalPoints =
           transaction.earnedPoints +
@@ -148,8 +146,6 @@ export const earnPoints = onRequest(async (request, response) => {
               .sort(
                 (a: any, b: any) => b.pointsThreshold - a.pointsThreshold
               )[0];
-            logger.info('Next tier', nextTier);
-            logger.info('Current tier', loyaltyCard!.tierId);
 
             if (nextTier && loyaltyCard!.tierId !== nextTier.id) {
               loyaltyCard!.tierId = nextTier.id;
@@ -157,6 +153,15 @@ export const earnPoints = onRequest(async (request, response) => {
 
             await updateLoyaltyCard(loyaltyCard!);
           }
+
+          // check if customer has hit any reward milestones
+          loyaltyProgram?.milestones.forEach((milestone) => {
+            /*
+            if (loyaltyCard!.points >= milestone.points) {
+              transaction.rewardsEarned.push(milestone.reward);
+            }
+              */
+          });
 
           response.status(200).send({
             message: 'Transaction completed successfully.',

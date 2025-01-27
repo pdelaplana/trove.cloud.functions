@@ -5,3 +5,4 @@ export { earnPoints } from './earnPoints';
 export { generateApiKey } from './generateApiKey';
 export { validateApiKey } from './validateApiKey';
 export { getLoyaltyCardInfo } from './getLoyaltyCardInfo';
+export { claimReward } from './claimReward';

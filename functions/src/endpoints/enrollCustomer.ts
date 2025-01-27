@@ -46,6 +46,7 @@ export const enrollCustomer = onRequest(async (request, response) => {
           response.status(403).send({
             error: 'Loyalty program does not belong to this business.',
           });
+          return;
         }
 
         const loyaltyCardId = await createLoyaltyCard(

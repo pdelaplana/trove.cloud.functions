@@ -6,6 +6,7 @@ import {
   generateApiKey,
   validateApiKey,
   getLoyaltyCardInfo,
+  claimReward,
 } from './endpoints';
 
 export {
@@ -16,4 +17,5 @@ export {
   generateApiKey,
   validateApiKey,
   getLoyaltyCardInfo,
+  claimReward,
 };
