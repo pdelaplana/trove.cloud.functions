@@ -1,7 +1,8 @@
-import { LoyaltyCard } from '@src/domain';
+import { Business, LoyaltyCard } from '@src/domain';
 import { db } from '../../firebase';
 import { generateMembershipNumber } from '../helpers/generateMembershipNumber';
 import { beginTimedOperation } from '../helpers/beginTimedOperation';
+import { fetchCustomerById, fetchLoyaltyProgramById } from '../queries';
 
 export const createLoyaltyCard = async (
   customerId: string,
@@ -16,13 +17,29 @@ export const createLoyaltyCard = async (
 
       const loyaltyCardsRef = businessRef.collection('loyaltyCards');
 
+      const business = (await businessRef.get()).data() as Business;
+      const loyaltyProgram = await fetchLoyaltyProgramById(
+        loyaltyProgramId,
+        businessId
+      );
+      const customer = await fetchCustomerById(customerId);
+
       const membershipNumbers = (await loyaltyCardsRef.get()).docs.map(
         (doc) => (doc.data() as LoyaltyCard).membershipNumber
       );
 
       const result = await loyaltyCardsRef.add({
+        businessId,
+        businessName: business.name,
+
         customerId,
+        customerName: `${customer.firstName} ${customer.lastName}`,
+        customerEmail: customer.email,
+        customerPhone: customer.phone,
+
         loyaltyProgramId,
+        loyaltyProgramName: loyaltyProgram.name,
+
         membershipNumber:
           generateMembershipNumber(6, new Set(membershipNumbers)) +
           '-' +
