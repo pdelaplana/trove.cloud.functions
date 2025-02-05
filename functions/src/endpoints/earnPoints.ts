@@ -5,7 +5,6 @@ import {
   fetchLoyaltyCardByMembershipNumber,
   fetchCustomerById,
 } from '../shared/queries';
-import { LoyaltyCardTransaction } from '@src/domain';
 import {
   createLoyaltyCardTransaction,
   deleteLoyaltyCardTransaction,
@@ -14,6 +13,7 @@ import {
 import { fetchLoyaltyProgramById } from '@src/shared/queries/fetchLoyaltyProgramById';
 import { beginTimedOperation } from '@src/shared/helpers/beginTimedOperation';
 import { runWithAuthentication } from '@src/shared/helpers/runWithAuthentication';
+import { hydrateLoyaltyCardTransaction } from '@src/shared/helpers/hydrateLoyaltyCardTransaction';
 
 export const earnPoints = onRequest(async (request, response) => {
   // check for required fields
@@ -52,28 +52,6 @@ export const earnPoints = onRequest(async (request, response) => {
           return;
         }
 
-        const transaction: Omit<LoyaltyCardTransaction, 'id'> = {
-          businessId: '',
-          businessName: '',
-          businessEmail: '',
-          loyaltyCardId: '',
-          loyaltyProgramId: '',
-          loyaltyProgramName: '',
-          customerId: '',
-          customerName: '',
-          customerEmail: customerEmail,
-          membershipNumber: membershipNumber,
-          transactionDate: new Date(),
-          purchaseAmount: amount,
-          discountAmount: 0,
-          finalAmount: 0,
-          earnedPoints: 0,
-          bonusPoints: 0,
-          redeemedPoints: 0,
-          totalPoints: 0,
-          rewardsEarned: [],
-        };
-
         const business = await fetchBusinessById(loyaltyCard!.businessId);
         const loyaltyProgram = await fetchLoyaltyProgramById(
           loyaltyCard.loyaltyProgramId,
@@ -82,16 +60,11 @@ export const earnPoints = onRequest(async (request, response) => {
 
         const customer = await fetchCustomerById(loyaltyCard!.customerId);
 
-        transaction.loyaltyCardId = loyaltyCard!.id;
-        transaction.membershipNumber = loyaltyCard!.membershipNumber;
-        transaction.customerId = loyaltyCard!.customerId;
-        transaction.customerName = `${customer.firstName} ${customer.lastName}`;
-        transaction.customerEmail = customer.email;
-        transaction.businessId = business.id;
-        transaction.businessName = business.name;
-        transaction.businessEmail = business.email;
-        transaction.loyaltyProgramId = loyaltyProgram!.id;
-        transaction.loyaltyProgramName = loyaltyProgram!.name;
+        const transaction = hydrateLoyaltyCardTransaction(
+          loyaltyCard,
+          customer,
+          business
+        );
 
         transaction.finalAmount = amount;
 
@@ -153,15 +126,6 @@ export const earnPoints = onRequest(async (request, response) => {
 
             await updateLoyaltyCard(loyaltyCard!);
           }
-
-          // check if customer has hit any reward milestones
-          loyaltyProgram?.milestones.forEach((milestone) => {
-            /*
-            if (loyaltyCard!.points >= milestone.points) {
-              transaction.rewardsEarned.push(milestone.reward);
-            }
-              */
-          });
 
           response.status(200).send({
             message: 'Transaction completed successfully.',

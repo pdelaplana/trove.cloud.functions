@@ -8,3 +8,4 @@ export { fetchBusinessIdByApiKey } from './fetchBusinessIdByApiKey';
 export { fetchCustomerByEmailOrPhone } from './fetchCustomerByEmailOrPhone';
 export { fetchLoyaltyProgramById } from './fetchLoyaltyProgramById';
 export { fetchLoyaltyCardByCustomerAndBusinessId } from './fetchLoyaltyCardByCustomerAndBusinessId';
+export { fetchLoyaltyProgramMilestoneById } from './fetchLoyaltyProgramMilestoneById';
