@@ -1,12 +1,19 @@
 import { onRequest } from 'firebase-functions/v2/https';
-import { upsertCustomer, createLoyaltyCard } from '../shared/mutations';
+import { upsertCustomer } from '../shared/mutations';
 import { logger } from 'firebase-functions/v2';
 import {
+  fetchBusinessById,
   fetchLoyaltyCardById,
   fetchLoyaltyProgramByUniqueCode,
 } from '../shared/queries';
 import { beginTimedOperation } from '@src/shared/helpers/beginTimedOperation';
 import { runWithAuthentication } from '@src/shared/helpers/runWithAuthentication';
+import {
+  createFirebaseEventBus,
+  setupCustomerEnrolledHandlers,
+} from '@src/eventBus';
+import { enrollCustomerToLoyaltyProgram } from '@src/domain/operations/enrollCustomerToLoyaltyProgram';
+import { fetchUsedMembershipNumbers } from '@src/shared/queries/fetchUsedmembershipNumbers';
 
 export const enrollCustomer = onRequest(async (request, response) => {
   if (request.method !== 'POST') {
@@ -18,17 +25,15 @@ export const enrollCustomer = onRequest(async (request, response) => {
     response.status(400).send({ error: 'Missing required fields.' });
   }
 
+  const eventBus = createFirebaseEventBus();
+  setupCustomerEnrolledHandlers(eventBus);
+
   beginTimedOperation(
     'enrollCustomer',
     { name, email, phone, loyaltyProgramNumber },
     async () => {
       runWithAuthentication(request, response, async (context) => {
         const { businessId } = context;
-        const customer = await upsertCustomer(name, email, phone);
-        if (!customer) {
-          response.status(500).send({ error: 'Error creating customer.' });
-          return;
-        }
 
         const loyaltyProgram =
           await fetchLoyaltyProgramByUniqueCode(loyaltyProgramNumber);
@@ -49,19 +54,40 @@ export const enrollCustomer = onRequest(async (request, response) => {
           return;
         }
 
-        const loyaltyCardId = await createLoyaltyCard(
-          customer!.id,
-          loyaltyProgram!.businessId,
-          loyaltyProgram!.id
-        );
+        try {
+          const [customer, business, usedMembershipNumbers] = await Promise.all(
+            [
+              upsertCustomer(name, email, phone),
+              fetchBusinessById(businessId),
+              fetchUsedMembershipNumbers(businessId),
+            ]
+          );
+          if (!customer) {
+            response.status(500).send({ error: 'Error creating customer.' });
+            return;
+          }
 
-        response.status(200).send({
-          message: 'Customer enrolled successfully.',
-          loyaltyCard: await fetchLoyaltyCardById(
-            loyaltyCardId,
-            loyaltyProgram!.businessId
-          ),
-        });
+          const result = await enrollCustomerToLoyaltyProgram(
+            {
+              business,
+              customer,
+              loyaltyProgram,
+              usedMembershipNumbers,
+            },
+            eventBus
+          );
+
+          response.status(200).send({
+            message: 'Customer enrolled successfully.',
+            loyaltyCard: await fetchLoyaltyCardById(
+              result.data!.loyaltyCardId,
+              loyaltyProgram!.businessId
+            ),
+          });
+        } catch (error) {
+          response.status(500).send({ error: 'Error creating customer.' });
+          return;
+        }
       });
     }
   );

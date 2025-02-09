@@ -1,25 +1,29 @@
+import { processRedemption } from '@src/domain/operations/processRedemption';
+import {
+  createFirebaseEventBus,
+  setupRewardEventHandlers,
+} from '@src/eventBus';
 import { allowedMethods } from '@src/shared/helpers/allowedMethods';
 import { beginTimedOperation } from '@src/shared/helpers/beginTimedOperation';
-import { hydrateLoyaltyCardTransaction } from '@src/shared/helpers/hydrateLoyaltyCardTransaction';
 import { runWithAuthentication } from '@src/shared/helpers/runWithAuthentication';
-import {
-  createCustomerReward,
-  createLoyaltyCardTransaction,
-  deleteLoyaltyCardTransaction,
-  updateLoyaltyCard,
-} from '@src/shared/mutations';
 import {
   fetchBusinessById,
   fetchCustomerById,
   fetchLoyaltyCardByMembershipNumber,
+  fetchLoyaltyCardTransactionById,
   fetchLoyaltyProgramMilestoneById,
 } from '@src/shared/queries';
+import { fetchCustomerRewardId } from '@src/shared/queries/fetchCustomerRewardId';
+import { logger } from 'firebase-functions/v2';
 import { onRequest } from 'firebase-functions/v2/https';
 
 export const claimReward = onRequest(async (request, response) => {
   allowedMethods(request, response, ['POST']);
 
   const { membershipNumber, loyaltyProgramMilestoneId } = request.body;
+
+  const eventBus = createFirebaseEventBus();
+  setupRewardEventHandlers(eventBus);
 
   beginTimedOperation(
     'claimReward',
@@ -33,6 +37,7 @@ export const claimReward = onRequest(async (request, response) => {
           response.status(404).send({ error: 'Loyalty card not found.' });
           return;
         }
+        logger.debug('Loyalty card found', { loyaltyCard });
         if (loyaltyCard.businessId !== businessId) {
           response
             .status(403)
@@ -40,10 +45,16 @@ export const claimReward = onRequest(async (request, response) => {
           return;
         }
 
-        const loyaltyProgramMilestone = await fetchLoyaltyProgramMilestoneById(
-          loyaltyProgramMilestoneId,
-          loyaltyCard.loyaltyProgramId,
-          businessId
+        const [business, customer, loyaltyProgramMilestone] = await Promise.all(
+          [
+            fetchBusinessById(businessId),
+            fetchCustomerById(loyaltyCard.customerId),
+            fetchLoyaltyProgramMilestoneById(
+              loyaltyProgramMilestoneId,
+              loyaltyCard.loyaltyProgramId,
+              businessId
+            ),
+          ]
         );
 
         if (!loyaltyProgramMilestone) {
@@ -51,59 +62,34 @@ export const claimReward = onRequest(async (request, response) => {
           return;
         }
 
-        if (loyaltyCard.points < loyaltyProgramMilestone.points) {
-          response
-            .status(403)
-            .send({ error: 'Insufficient points to claim this reward' });
+        const { success, error, data } = await processRedemption(
+          {
+            loyaltyCard,
+            customer,
+            business,
+            loyaltyProgramMilestone,
+            transactionType: 'redeem',
+          },
+          eventBus
+        );
+
+        if (!success || !data) {
+          response.status(500).send({ error: error });
           return;
         }
 
-        // add the reward to the loyalty card
-        const rewardId = await createCustomerReward(
-          loyaltyCard.businessId,
-          loyaltyCard.id,
-          loyaltyProgramMilestone.reward
-        );
-
-        if (rewardId !== null) {
-          // create the transaction
-
-          const business = await fetchBusinessById(businessId);
-          const customer = await fetchCustomerById(loyaltyCard.customerId);
-
-          // create and hydrate the transaction
-          const transaction = hydrateLoyaltyCardTransaction(
-            loyaltyCard,
-            customer,
-            business
-          );
-
-          transaction.transactionType = 'redeem';
-          transaction.redeemedPoints = loyaltyProgramMilestone.points;
-
-          transaction.totalPoints =
-            transaction.earnedPoints +
-            transaction.bonusPoints -
-            transaction.redeemedPoints;
-
-          let transactionId = '';
-          try {
-            // create the transaction
-            transactionId = await createLoyaltyCardTransaction(transaction);
-
-            if (transactionId) {
-              loyaltyCard.points -= loyaltyProgramMilestone.points;
-              updateLoyaltyCard(loyaltyCard);
-            }
-          } catch (error) {
-            if (!transactionId)
-              deleteLoyaltyCardTransaction(businessId, transactionId);
-            response.status(500).send({ error: 'Error claiming reward' });
-            return;
-          }
-        }
-
-        response.status(200).send({ message: 'Reward claimed', rewardId });
+        response.status(200).send({
+          message: 'Reward claimed',
+          reward: await fetchCustomerRewardId(
+            data.rewardId,
+            businessId,
+            loyaltyCard.id
+          ),
+          transaction: await fetchLoyaltyCardTransactionById(
+            data.transactionId,
+            businessId
+          ),
+        });
       });
     }
   );

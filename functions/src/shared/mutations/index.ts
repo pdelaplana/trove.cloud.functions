@@ -1,7 +1,7 @@
-export { createLoyaltyCard } from './createLoyaltyCard';
-export { createLoyaltyCardTransaction } from './createLoyaltyCardTransaction';
+export { addLoyaltyCardTransaction } from './addLoyaltyCardTransaction';
 export { upsertCustomer } from './upsertCustomer';
 export { updateLoyaltyCard } from './updateLoyaltyCard';
 export { deleteLoyaltyCardTransaction } from './deleteLoyaltyCardTransaction';
 export { upsertApiKey } from './upsertApiKey';
-export { createCustomerReward } from './createCustomerReward';
+export { addCustomerReward } from './addCustomerReward';
+export { addLoyaltyCard } from './addLoyaltyCard';
