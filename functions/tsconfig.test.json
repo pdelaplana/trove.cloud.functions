@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest", "node"],
+    "noEmit": true
+  },
+  "include": [
+    ".eslintrc.js",
+    "src/**/*",
+    "test/**/*",
+    "**/*.test.ts",
+    "jest.config.ts"
+  ]
+}

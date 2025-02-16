@@ -1,4 +1,4 @@
-import { processRedemption } from '@src/domain/operations/processRedemption';
+import { processClaimReward } from '@src/domain/operations';
 import {
   createFirebaseEventBus,
   setupRewardEventHandlers,
@@ -14,6 +14,7 @@ import {
   fetchLoyaltyProgramMilestoneById,
 } from '@src/shared/queries';
 import { fetchCustomerRewardId } from '@src/shared/queries/fetchCustomerRewardId';
+import { fetchCustomerRewards } from '@src/shared/queries/fetchCustomerRewards';
 import { logger } from 'firebase-functions/v2';
 import { onRequest } from 'firebase-functions/v2/https';
 
@@ -45,8 +46,8 @@ export const claimReward = onRequest(async (request, response) => {
           return;
         }
 
-        const [business, customer, loyaltyProgramMilestone] = await Promise.all(
-          [
+        const [business, customer, loyaltyProgramMilestone, customerRewards] =
+          await Promise.all([
             fetchBusinessById(businessId),
             fetchCustomerById(loyaltyCard.customerId),
             fetchLoyaltyProgramMilestoneById(
@@ -54,20 +55,21 @@ export const claimReward = onRequest(async (request, response) => {
               loyaltyCard.loyaltyProgramId,
               businessId
             ),
-          ]
-        );
+            fetchCustomerRewards(businessId, loyaltyCard.id),
+          ]);
 
         if (!loyaltyProgramMilestone) {
           response.status(404).send({ error: 'Milestone not found.' });
           return;
         }
 
-        const { success, error, data } = await processRedemption(
+        const { success, error, data } = await processClaimReward(
           {
             loyaltyCard,
             customer,
             business,
             loyaltyProgramMilestone,
+            customerRewards,
             transactionType: 'redeem',
           },
           eventBus

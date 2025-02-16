@@ -7,7 +7,7 @@ module.exports = {
   extends: ['eslint:recommended'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: ['./tsconfig.json', './tsconfig.dev.json'],
+    project: ['./tsconfig.json', './tsconfig.dev.json', './tsconfig.test.json'],
     tsconfigRootDir: __dirname,
     sourceType: 'module',
   },
