@@ -19,6 +19,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
+          #token: ${{ secrets.GH_PAT }} # Required if submodule is in private repo
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
