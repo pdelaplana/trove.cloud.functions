@@ -7,6 +7,7 @@ import {
   validateApiKey,
   getLoyaltyCardInfo,
   claimReward,
+  decryptApiKey,
 } from './endpoints';
 
 export {
@@ -18,4 +19,5 @@ export {
   validateApiKey,
   getLoyaltyCardInfo,
   claimReward,
+  decryptApiKey,
 };

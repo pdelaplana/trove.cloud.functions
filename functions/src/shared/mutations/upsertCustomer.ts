@@ -25,6 +25,8 @@ export const upsertCustomer = async (
           lastName: name.split(' ')[1],
           email,
           phone,
+          gender: 'preferNotToSay',
+          created: new Date(),
         } as Omit<Customer, 'id'>)
       ).get();
 

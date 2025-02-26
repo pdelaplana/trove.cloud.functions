@@ -11,22 +11,25 @@ export const fetchLoyaltyCardByCustomerAndBusinessId = async (
     'fetchLoyaltyCardByCustomerAndBusinessId',
     { customerId, businessId },
     async () => {
-      const businessRef = db.collection('businesses').doc(businessId);
-      if (!businessRef) {
-        throw new Error(`Business with id ${businessId} not found`);
-      }
-      const query = await businessRef
-        .collection('loyaltyCards')
-        .where('customerId', '==', customerId)
-        .limit(1)
-        .get();
+      try {
+        const query = await db
+          .collection('businesses')
+          .doc(businessId)
+          .collection('loyaltyCards')
+          .where('customerId', '==', customerId)
+          .limit(1)
+          .get();
 
-      if (query.empty) {
-        logger.warn('Loyalty Card not found', { customerId });
-        return null;
-      }
+        if (query.empty) {
+          logger.warn('Loyalty Card not found', { customerId, businessId });
+          return null;
+        }
 
-      return toLoyaltyCard(query.docs[0]);
+        return toLoyaltyCard(query.docs[0]);
+      } catch (error) {
+        logger.error('Error fetching loyalty card', { error });
+        throw error;
+      }
     }
   );
 };

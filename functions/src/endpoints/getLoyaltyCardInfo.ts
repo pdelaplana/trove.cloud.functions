@@ -17,7 +17,7 @@ export const getLoyaltyCardInfo = onRequest(
     handleRequest('getLoyaltYCard', req, res, ['GET'], {}, async (context) => {
       const { businessId } = context;
 
-      const identifier = req.query.membershipId as string | undefined;
+      const identifier = req.query.lookupid as string | undefined;
       if (!identifier) {
         res.status(400).send('Membership number is required');
         return;
@@ -39,10 +39,11 @@ export const getLoyaltyCardInfo = onRequest(
         );
       }
       if (!loyaltyCard) {
+        logger.info('Loyalty card found', { loyaltyCard });
+
         res.status(404).send('Loyalty card not found');
         return;
       }
-      logger.info('Loyalty card found', { loyaltyCard });
 
       // add information about the customer, business and loyalty information to the response
       const customer = await fetchCustomerById(loyaltyCard.customerId);

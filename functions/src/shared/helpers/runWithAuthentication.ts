@@ -1,3 +1,4 @@
+import { logger } from 'firebase-functions/v2';
 import { authenticateApiKey } from './authenticateApiKey';
 
 export const runWithAuthentication = async <T>(
@@ -11,6 +12,7 @@ export const runWithAuthentication = async <T>(
     const result = await fn({ businessId });
     return result;
   } catch (error) {
+    logger.error('Internal server error', { error });
     response.status(500).send({ error: 'Internal server error' });
     return null;
   }
