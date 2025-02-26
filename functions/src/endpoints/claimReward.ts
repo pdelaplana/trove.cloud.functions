@@ -13,7 +13,7 @@ import {
   fetchLoyaltyCardTransactionById,
   fetchLoyaltyProgramMilestoneById,
 } from '@src/shared/queries';
-import { fetchCustomerRewardId } from '@src/shared/queries/fetchCustomerRewardId';
+import { fetchCustomerRewardById } from '@src/shared/queries/fetchCustomerRewardById';
 import { fetchCustomerRewards } from '@src/shared/queries/fetchCustomerRewards';
 import { logger } from 'firebase-functions/v2';
 import { onRequest } from 'firebase-functions/v2/https';
@@ -84,7 +84,7 @@ export const claimReward = onRequest(async (request, response) => {
 
           response.status(200).send({
             message: 'Reward claimed',
-            reward: await fetchCustomerRewardId(
+            reward: await fetchCustomerRewardById(
               data.rewardId,
               businessId,
               loyaltyCard.id

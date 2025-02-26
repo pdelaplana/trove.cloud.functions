@@ -2,7 +2,7 @@ import { CustomerReward } from '@src/domain';
 import { db } from '@src/firebase';
 import { toCustomerReward } from '../mappers/toCustomerReward';
 
-export const fetchCustomerRewardId = async (
+export const fetchCustomerRewardById = async (
   id: string,
   businessId: string,
   loyaltyCardId: string
