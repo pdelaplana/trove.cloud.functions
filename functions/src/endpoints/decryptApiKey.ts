@@ -1,17 +1,27 @@
 import { decryptKey } from '@src/shared/helpers/encryptionHelpers';
+import { handleUnauthenticatedRequest } from '@src/shared/helpers/handleRequest';
 import { onRequest } from 'firebase-functions/v2/https';
 
 export const decryptApiKey = onRequest(async (req, res) => {
-  const { encryptedKey } = req.body;
-  if (!encryptedKey) {
-    res.status(400).send({ error: 'encryptedKey  is required' });
-    return;
-  }
+  handleUnauthenticatedRequest(
+    'decryptApiKey',
+    req,
+    res,
+    ['POST'],
+    {},
+    async () => {
+      const { encryptedKey } = req.body;
+      if (!encryptedKey) {
+        res.status(400).send({ error: 'encryptedKey  is required' });
+        return;
+      }
 
-  try {
-    const decryptedKey = decryptKey(encryptedKey!);
-    res.status(200).send({ decryptedKey });
-  } catch (error) {
-    res.status(500).send({ error: 'Unable to decrypt encryptedKey' });
-  }
+      try {
+        const decryptedKey = decryptKey(encryptedKey!);
+        res.status(200).send({ decryptedKey });
+      } catch (error) {
+        res.status(500).send({ error: 'Unable to decrypt encryptedKey' });
+      }
+    }
+  );
 });

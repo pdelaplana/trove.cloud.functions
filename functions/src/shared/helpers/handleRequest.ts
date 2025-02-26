@@ -29,3 +29,27 @@ export async function handleRequest<T>(
     });
   });
 }
+
+export async function handleUnauthenticatedRequest<T>(
+  name: string,
+  request: any,
+  response: any,
+  methods: string[] = ['GET', 'POST'],
+  context: Record<string, any> = {},
+  fn: (context: Record<string, any>) => Promise<T>
+) {
+  cors({ origin: true })(request, response, async () => {
+    allowedMethods(request, response, methods);
+
+    beginTimedOperation(name, context, async () => {
+      try {
+        const result = await fn(context);
+        return result;
+      } catch (error) {
+        logger.error('Internal server error', { error });
+        response.status(500).send({ error: 'Internal server error' });
+        return null;
+      }
+    });
+  });
+}
