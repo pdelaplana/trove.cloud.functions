@@ -34,8 +34,11 @@ export function bcryptCompare(
 
 // Function to encrypt API key
 export function encryptKey(apiKey: string): string {
-  const { ENCRYPTION_SECRET } = useConfig();
   try {
+    const { ENCRYPTION_SECRET } = useConfig();
+    if (!ENCRYPTION_SECRET) {
+      throw new Error('Environment variable ENCRYPTION_SECRET is required');
+    }
     // Generate a random IV
     const iv = crypto.randomBytes(16);
 
@@ -61,8 +64,12 @@ export function encryptKey(apiKey: string): string {
 
 // Function to decrypt API key
 export function decryptKey(encryptedKey: string): string {
-  const { ENCRYPTION_SECRET } = useConfig();
   try {
+    const { ENCRYPTION_SECRET } = useConfig();
+    if (!ENCRYPTION_SECRET) {
+      throw new Error('Environment variable ENCRYPTION_SECRET is required');
+    }
+
     // Split IV and encrypted data
     const [ivHex, encryptedHex] = encryptedKey.split(':');
     if (!ivHex || !encryptedHex) {
