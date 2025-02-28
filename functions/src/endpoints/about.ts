@@ -1,8 +1,8 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import cors from 'cors';
 
-export const about = onRequest((request, response) => {
-  cors({})(request, response, () => {
+export const about = onRequest({}, (request, response) => {
+  cors({ origin: true })(request, response, () => {
     const info = {
       name: 'Trove',
       description: 'A loyalty card management app',

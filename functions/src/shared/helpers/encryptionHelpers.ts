@@ -36,16 +36,17 @@ export function bcryptCompare(
 export function encryptKey(apiKey: string): string {
   try {
     const { ENCRYPTION_SECRET } = useConfig();
+    logger.info(ENCRYPTION_SECRET);
     if (!ENCRYPTION_SECRET) {
       throw new Error('Environment variable ENCRYPTION_SECRET is required');
     }
+
+    // Create a key from the secret and a random salt
+    const salt = crypto.randomBytes(16);
+    const key = crypto.scryptSync(ENCRYPTION_SECRET, salt, 32);
+
     // Generate a random IV
     const iv = crypto.randomBytes(16);
-
-    // Create a key from the secret
-    const key = crypto.scryptSync(ENCRYPTION_SECRET, 'salt', 32);
-
-    // Create cipher with key and IV
     const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
 
     // Encrypt the data
@@ -54,11 +55,11 @@ export function encryptKey(apiKey: string): string {
       cipher.final(),
     ]);
 
-    // Combine IV and encrypted data with a delimiter
-    return `${iv.toString('hex')}:${encryptedData.toString('hex')}`;
+    // Combine salt, IV and encrypted data with delimiters
+    return `${salt.toString('hex')}:${iv.toString('hex')}:${encryptedData.toString('hex')}`;
   } catch (error) {
     logger.error('Error encrypting API key', error);
-    throw error; // Better to throw than return empty string
+    throw error;
   }
 }
 
@@ -70,20 +71,20 @@ export function decryptKey(encryptedKey: string): string {
       throw new Error('Environment variable ENCRYPTION_SECRET is required');
     }
 
-    // Split IV and encrypted data
-    const [ivHex, encryptedHex] = encryptedKey.split(':');
-    if (!ivHex || !encryptedHex) {
+    // Split salt, IV and encrypted data
+    const [saltHex, ivHex, encryptedHex] = encryptedKey.split(':');
+    if (!saltHex || !ivHex || !encryptedHex) {
       throw new Error('Invalid encrypted key format');
     }
 
     // Convert hex strings back to buffers
+    const salt = Buffer.from(saltHex, 'hex');
     const iv = Buffer.from(ivHex, 'hex');
     const encrypted = Buffer.from(encryptedHex, 'hex');
 
-    // Create key from secret
-    const key = crypto.scryptSync(ENCRYPTION_SECRET, 'salt', 32);
+    // Create key using the same salt
+    const key = crypto.scryptSync(ENCRYPTION_SECRET, salt, 32);
 
-    // Create decipher
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
 
     // Decrypt the data
@@ -95,6 +96,6 @@ export function decryptKey(encryptedKey: string): string {
     return decrypted.toString('utf8');
   } catch (error) {
     logger.error('Error decrypting API key', error);
-    throw error; // Better to throw than return empty string
+    throw error;
   }
 }

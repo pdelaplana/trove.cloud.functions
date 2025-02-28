@@ -7,3 +7,4 @@ export { validateApiKey } from './validateApiKey';
 export { getLoyaltyCardInfo } from './getLoyaltyCardInfo';
 export { claimReward } from './claimReward';
 export { decryptApiKey } from './decryptApiKey';
+export { regenerateApiKey } from './regenerateApiKey';
