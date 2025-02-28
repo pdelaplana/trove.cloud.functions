@@ -1,20 +1,5 @@
-import { defineSecret, defineString } from 'firebase-functions/params';
-
 // Define environment type
 type NodeEnv = 'development' | 'production' | 'test';
-
-// Define Firebase config parameters
-
-export const config = {
-  environment: {
-    name: defineString('ENVIRONMENT_NAME', {
-      default: 'development',
-    }),
-  },
-  encryption: {
-    secret: defineSecret('ENCRYPTION_SECRET'),
-  },
-};
 
 export type Config = {
   ENVIRONMENT: NodeEnv;
