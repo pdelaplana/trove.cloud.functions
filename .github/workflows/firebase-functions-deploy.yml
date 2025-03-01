@@ -40,6 +40,27 @@ jobs:
           ENVIRONMENT_NAME: "test"
           ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
 
+        # Create .env file for the appropriate environment
+      - name: Create .env file
+        run: |
+          cd functions
+
+          # Determine environment based on branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Setting up production environment"
+            ENV="production"
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "Setting up staging environment"
+            ENV="staging"
+          else
+            echo "Setting up development environment"
+            ENV="development"
+          fi
+
+          # Create .env.prod file
+          echo "ENVIRONMENT_NAME=production" > .env.prod
+          echo "ENCRYPTION_SECRET=${{ secrets.ENCRYPTION_SECRET }}" >> .env.prod
+
       - name: Build
         run: npm run build
         env:
