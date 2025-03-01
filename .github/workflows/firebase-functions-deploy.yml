@@ -46,6 +46,21 @@ jobs:
           cache: "npm"
           cache-dependency-path: "./functions/package-lock.json"
 
+      - name: Create Environment File
+        working-directory: ./functions
+        run: |
+          echo "ENVIRONMENT_NAME=${{ github.event.inputs.environment || 'production' }}" > .env
+          echo "ENCRYPTION_SECRET=${{ secrets.ENCRYPTION_SECRET }}" >> .env
+
+      - name: Debug ENV File
+        if: ${{ inputs.debug_mode }}
+        working-directory: ./functions
+        run: |
+          echo "ENV file location:"
+          pwd
+          echo "ENV file contents (without secrets):"
+          grep -v ENCRYPTION_SECRET .env || true
+
       - name: Install Dependencies
         run: npm ci
 
