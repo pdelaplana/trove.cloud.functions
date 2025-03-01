@@ -42,14 +42,15 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          NODE_ENV: "prod"
+          ENVIRONMENT_NAME: "production"
+          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
 
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
           args: deploy --only functions
         env:
-          NODE_ENV: "production"
-          ENVIRONMENT_NAME: "production"
-          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
