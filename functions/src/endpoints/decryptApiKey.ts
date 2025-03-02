@@ -8,9 +8,10 @@ export const decryptApiKey = onRequest(async (req, res) => {
     req,
     res,
     ['POST'],
+    ['encrypteKey'],
     {},
-    async () => {
-      const { encryptedKey } = req.body;
+    async (context) => {
+      const { encryptedKey } = context.params;
       if (!encryptedKey) {
         res.status(400).send({ error: 'encryptedKey  is required' });
         return;

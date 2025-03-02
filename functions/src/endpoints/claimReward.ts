@@ -24,9 +24,10 @@ export const claimReward = onRequest(
       request,
       response,
       ['POST'],
+      ['membershipNumber', 'loyaltyProgramMilestoneId'],
       {},
       async (context) => {
-        const { membershipNumber, loyaltyProgramMilestoneId } = request.body;
+        const { membershipNumber, loyaltyProgramMilestoneId } = context.params;
 
         const eventBus = createFirebaseEventBus();
         setupRewardEventHandlers(eventBus);
