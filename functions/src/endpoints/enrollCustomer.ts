@@ -26,9 +26,6 @@ export const enrollCustomer = onRequest(
       {},
       async (context) => {
         const { name, email, phone, loyaltyProgramNumber } = context.params;
-        if (!name || !email || !phone || !loyaltyProgramNumber) {
-          response.status(400).send({ error: 'Missing required fields.' });
-        }
 
         const eventBus = createFirebaseEventBus();
         setupCustomerEnrolledHandlers(eventBus);
