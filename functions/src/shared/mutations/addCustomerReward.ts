@@ -18,11 +18,8 @@ export const addCustomerReward = async (
           `Business with id ${customerReward.businessId} not found`
         );
       }
-      const loyaltyCardRef = businessRef
-        .collection('loyaltyCards')
-        .doc(customerReward.loyaltyCardId);
 
-      const customerRewardRef = await loyaltyCardRef
+      const customerRewardRef = await businessRef
         .collection('customerRewards')
         .add({ ...customerReward } as Omit<CustomerReward, 'id'>);
 
