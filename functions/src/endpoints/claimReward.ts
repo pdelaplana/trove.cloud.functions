@@ -82,7 +82,6 @@ export const claimReward = onRequest(
 
         response.status(200).send({
           message: 'Reward claimed',
-            data.rewardId,
           reward: await fetchCustomerRewardById(data.rewardId, businessId),
           transaction: await fetchLoyaltyCardTransactionById(
             data.transactionId,
