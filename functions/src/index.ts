@@ -9,6 +9,8 @@ import {
   claimReward,
   decryptApiKey,
   regenerateApiKey,
+  getRewardInfo,
+  redeemReward,
 } from './endpoints';
 
 export {
@@ -22,4 +24,6 @@ export {
   claimReward,
   decryptApiKey,
   regenerateApiKey,
+  getRewardInfo,
+  redeemReward,
 };

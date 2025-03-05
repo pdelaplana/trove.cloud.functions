@@ -9,3 +9,5 @@ export { fetchCustomerByEmailOrPhone } from './fetchCustomerByEmailOrPhone';
 export { fetchLoyaltyProgramById } from './fetchLoyaltyProgramById';
 export { fetchLoyaltyCardByCustomerAndBusinessId } from './fetchLoyaltyCardByCustomerAndBusinessId';
 export { fetchLoyaltyProgramMilestoneById } from './fetchLoyaltyProgramMilestoneById';
+export { fetchCustomerRewardById } from './fetchCustomerRewardById';
+export { fetchCustomerRewards } from './fetchCustomerRewards';

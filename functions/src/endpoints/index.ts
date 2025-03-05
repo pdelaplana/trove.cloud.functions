@@ -8,3 +8,5 @@ export { getLoyaltyCardInfo } from './getLoyaltyCardInfo';
 export { claimReward } from './claimReward';
 export { decryptApiKey } from './decryptApiKey';
 export { regenerateApiKey } from './regenerateApiKey';
+export { getRewardInfo } from './getRewardInfo';
+export { redeemReward } from './redeemReward';

@@ -3,11 +3,13 @@ import { DomainEvent } from './domain/events/domainEvent';
 import {
   RewardClaimedEvent,
   RewardClaimFailedEvent,
+  RewardRedemptionEvent,
 } from './domain/events/rewardEvents';
 import {
   addCustomerReward,
   addLoyaltyCardTransaction,
   deleteLoyaltyCardTransaction,
+  updateCustomerReward,
   updateLoyaltyCard,
 } from './shared/mutations';
 import { LoyaltyPointsEarnedEvent } from './domain/events/earnEvents';
@@ -162,6 +164,37 @@ export const setupRewardEventHandlers = (eventBus: EventBus) => {
         data: { error: event.payload.error },
       };
       // Additional error handling logic
+    }
+  );
+
+  // Handle reward redemptions
+  eventBus.subscribe<RewardRedemptionEvent>(
+    'RewardRedemption',
+    async (event) => {
+      const { customerReward, loyaltyCardTransaction, loyaltyCard } =
+        event.payload;
+      let transactionId: string | null = null;
+      try {
+        transactionId = await addLoyaltyCardTransaction(loyaltyCardTransaction);
+
+        if (transactionId) {
+          // Update reward in database
+          await updateCustomerReward(customerReward);
+          await updateLoyaltyCard(loyaltyCard);
+        }
+
+        return { data: { transactionId } };
+      } catch (error) {
+        if (transactionId) {
+          // Rollback transaction
+          await deleteLoyaltyCardTransaction(
+            loyaltyCard.businessId,
+            transactionId
+          );
+        }
+        logger.error('Error processing reward claimed event', error);
+        throw error;
+      }
     }
   );
 

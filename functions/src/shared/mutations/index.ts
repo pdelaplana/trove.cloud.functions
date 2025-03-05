@@ -5,3 +5,4 @@ export { deleteLoyaltyCardTransaction } from './deleteLoyaltyCardTransaction';
 export { upsertApiKey } from './upsertApiKey';
 export { addCustomerReward } from './addCustomerReward';
 export { addLoyaltyCard } from './addLoyaltyCard';
+export { updateCustomerReward } from './updateCustomerReward';
