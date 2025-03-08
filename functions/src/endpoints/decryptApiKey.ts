@@ -8,7 +8,7 @@ export const decryptApiKey = onRequest(async (req, res) => {
     req,
     res,
     ['POST'],
-    ['encrypteKey'],
+    ['encryptedKey'],
     {},
     async (context) => {
       const { encryptedKey } = context.params;
