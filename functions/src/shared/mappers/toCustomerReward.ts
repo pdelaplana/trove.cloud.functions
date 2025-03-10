@@ -11,6 +11,8 @@ export const toCustomerReward = (doc: DocumentSnapshot): CustomerReward => {
   return {
     ...data,
     expiryDate: data?.expiryDate?.toDate() ?? null,
+    redeemedDate: data?.redeemedDate?.toDate() ?? null,
+    claimedDate: data?.claimedDate?.toDate() ?? null,
     id: doc.id,
     businessId: doc.ref.parent.parent?.id,
   } as CustomerReward;
