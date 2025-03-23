@@ -9,17 +9,38 @@ export const updateSearchableKeywords = onDocumentWritten(
       if (!event.data) {
         throw new Error('Event data is undefined');
       }
+      const beforeData = event.data.before.data();
       const afterData = event.data.after.data();
-      const businessId = event.params.businessId;
-      const loyaltyCardId = event.params.loyaltyCardId;
+
+      // Skip if keywords haven't changed
+      const hasRelevantChanges = [
+        'membershipNumber',
+        'customerName',
+        'customerEmail',
+        'customerPhone',
+      ].some((field) => beforeData?.[field] !== afterData?.[field]);
+
+      if (!hasRelevantChanges) {
+        logger.debug('No relevant changes, skipping keyword update');
+        return;
+      }
+
+      const normalizeText = (text: string | null | undefined): string[] => {
+        if (!text) return [];
+        return text
+          .toLowerCase()
+          .trim()
+          .split(/[\s,-]+/) // Handle multiple delimiter types
+          .filter((word) => word.length >= 2 && word.length <= 50) // Reasonable length limits
+          .slice(0, 20); // Limit total keywords per field
+      };
 
       let keywords = [
-        ...(afterData?.membershipNumber?.toLowerCase().split(' ') ?? []),
-        ...(afterData?.customerName?.toLowerCase().split(' ') ?? []),
-        ...(afterData?.customerEmail?.toLowerCase().split(' ') ?? []),
-        ...(afterData?.customerPhone?.toLowerCase().split(' ') ?? []),
+        ...normalizeText(afterData?.membershipNumber),
+        ...normalizeText(afterData?.customerName),
+        ...normalizeText(afterData?.customerEmail),
+        ...normalizeText(afterData?.customerPhone),
       ];
-      keywords = keywords.filter((keyword) => keyword.length > 0);
       keywords = [...new Set(keywords)];
 
       // Also add partial matches for each word (prefixes)
@@ -41,6 +62,9 @@ export const updateSearchableKeywords = onDocumentWritten(
       console.log(
         `Generated ${keywords.length} search keywords for customer: ${afterData?.customerName}`
       );
+
+      const businessId = event.params.businessId;
+      const loyaltyCardId = event.params.loyaltyCardId;
 
       const loyaltyCard = await db
         .collection('businesses')
