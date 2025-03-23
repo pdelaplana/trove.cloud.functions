@@ -12,6 +12,7 @@ import {
   getRewardInfo,
   redeemReward,
 } from './endpoints';
+import { updateSearchableKeywords } from './triggers';
 
 export {
   enrollCustomer,
@@ -26,4 +27,5 @@ export {
   regenerateApiKey,
   getRewardInfo,
   redeemReward,
+  updateSearchableKeywords,
 };
